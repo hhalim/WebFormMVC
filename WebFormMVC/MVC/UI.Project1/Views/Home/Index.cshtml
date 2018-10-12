@@ -7,8 +7,39 @@
 
 <p>
     Virtual path: @VirtualPath <br />
-    Physical path: @Server.MapPath(VirtualPath) 
+    Physical path: @Server.MapPath(VirtualPath) <br/>
+</p>
+<p>
+    <input type="button" id="getUser" value="Get Users"/> <br/>
+    <span id="jsonData"></span>
 </p>
 <p>
     Go back <a href="/WebForm.aspx">Home</a>
 </p>
+
+@section scripts
+{
+    <script type='text/javascript'>
+        var serviceBaseUrl = '@ViewBag.ServiceBaseUrl';
+
+        $(document).ready(function() {
+            //NOTE: The action calls the REST Api directly, this works since the rest web api is in the same server and domain
+            //If the rest api is not in the same domain, then must call asp.net MVC controller method first and use RestSharp or WebClient to call web api.
+            $('#getUser').click(function() {
+
+                var restUrl = serviceBaseUrl + '/user/';
+                $.ajax({
+                    type: 'GET',
+                    url: restUrl,
+                    crossDomain: true,
+                    success: function(data) {
+                        $('#jsonData').text(JSON.stringify(data));
+                    }
+                });
+
+            });
+
+        });
+
+    </script>
+}

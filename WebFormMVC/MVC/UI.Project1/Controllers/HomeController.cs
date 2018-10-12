@@ -11,6 +11,9 @@ namespace UI.Project1.Controllers
         // GET: Home
         public ActionResult Index()
         {
+            var svcUrl = Helpers.GetRestServicesUrl(HttpContext.Request);
+            ViewBag.ServiceBaseUrl = svcUrl;
+
             return View();
         }
     }

@@ -6,8 +6,6 @@ using Domain.Models;
 using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace RestApi.Controllers
 {
     [Route("api/[controller]")]
@@ -22,17 +20,17 @@ namespace RestApi.Controllers
 
         // GET: api/<controller>
         [HttpGet]
-        public IActionResult Get()
+        public IEnumerable<User> Get()
         {
             var service = _userService.Value;
-            return Ok(service.Get());
+            return service.Get();
         }
 
         // GET api/<controller>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public User Get(int id)
         {
-            return Ok();
+            return null; //TODO: has not been implemented in IUserService 
         }
 
         // POST api/<controller>

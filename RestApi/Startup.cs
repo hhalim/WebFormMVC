@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -58,7 +60,7 @@ namespace RestApi
 
             //Use CORS
             //Note: Doesn't work in IE 8/9 or Compatibility mode
-            //app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()); //Dangerous to allow any origin
+            //app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()); //Dangerous to allow any origin, okay for debugging
             app.UseCors("AllowSpecificOrigin");
 
             //Logging
@@ -84,10 +86,11 @@ namespace RestApi
 
             var builder = new ContainerBuilder();
 
-            //Register DataLayer
-            //NOTE: This Project has direct references to the DAL.MSSQL and DAL.Oracle, which is incorrect, but okay for Proof of Concept here.
-            //There should NOT be a strong dependency, but .NET core project doesn't automatically pull the dependent DLLs from Business.Services.
-            //In real project, the DAL.MSSQL.dll and DAL.Oracle.dll will be dropped into the /bin folder through a build script.
+            // Register DataLayer
+            // NOTE: This Project has direct references to the DAL.MSSQL and DAL.Oracle, which is okay for Proof of Concept here.
+            // The DAL.MSSQL.dll and DAL.Oracle.dll can be dropped into the /bin folder through a build script.
+            // No code in this project should be "using DAL.MSSQL;" or "using DAL.Oracle" directly.
+            // Instead, use Domain.Repository interfaces if need to use any repository infrastructure.
             var dalSettings = Configuration.GetSection("DalSettings");
             var assemblyName = dalSettings["Assembly"];
             var connectionString = dalSettings["ConnectionString"];
@@ -99,7 +102,11 @@ namespace RestApi
                 .WithParameter("connectionString", connectionString);
             builder.RegisterAssemblyTypes(dalAssembly).Where(t => t.IsClass && t.Name.EndsWith(dalSettings["RepositoryEndsWith"])).AsImplementedInterfaces();
 
-            //Register Business.Services business layer
+            // Register Business.Services business layer
+            // NOTE: This Project has direct references to the Business.Services, which is okay for Proof of Concept here.
+            // Another option is to have the Business.Services.dll can be dropped into the /bin folder in production using build script instead.
+            // No code in this project should be "using Business.Services" directly.
+            // Instead, use the Domain.Services interfaces to use the business services.
             var servicesSettings = Configuration.GetSection("ServicesSettings");
             var servicesList = Array.ConvertAll(servicesSettings["Assembly"].Split(';'), p => p.Trim());
             foreach (var name in servicesList)
