@@ -1,0 +1,14 @@
+﻿
+@{
+    ViewBag.Title = "MVC Home";
+}
+
+<h1>@ViewBag.Title</h1>
+
+<p>
+    Virtual path: @VirtualPath <br />
+    Physical path: @Server.MapPath(VirtualPath) 
+</p>
+<p>
+    Go back <a href="/WebForm.aspx">Home</a>
+</p>
