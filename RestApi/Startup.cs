@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +25,8 @@ namespace RestApi
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public IContainer ApplicationContainer { get; private set; }
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             //CORS
             var corsSettings = Configuration.GetSection("CORSSettings");
@@ -40,14 +39,14 @@ namespace RestApi
                     .AllowAnyHeader());
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddSingleton<IConfiguration>(Configuration);
 
             var serviceProvider = ConfigureAutofac(services); //Autofac
+            return serviceProvider;
         }
-
-        public IContainer ApplicationContainer { get; private set; }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,  IApplicationLifetime appLifetime)
@@ -73,26 +72,22 @@ namespace RestApi
             appLifetime.ApplicationStopped.Register(() => this.ApplicationContainer.Dispose());
         }
 
-                //Autofac DI configuration and registrations
-        private AutofacServiceProvider ConfigureAutofac(IServiceCollection services)
+        //Autofac DI configuration and registrations
+        private IServiceProvider ConfigureAutofac(IServiceCollection services)
         {
             //Autofac DI
             //http://docs.autofac.org/en/latest/integration/aspnetcore.html
 
+            //REMOVED: properties injection not used in this solution, but optional.
             //Add ControllerActivator to autofac registration, used for Properties DI in controller, not just Constructor
             //https://github.com/autofac/Autofac/issues/713
-            services.Replace(ServiceDescriptor.Transient<IControllerActivator, ServiceBasedControllerActivator>());
-
-            var manager = new ApplicationPartManager();
-            manager.ApplicationParts.Add(new AssemblyPart(Assembly.GetExecutingAssembly()));
-            manager.FeatureProviders.Add(new ControllerFeatureProvider());
-            var feature = new ControllerFeature();
-            manager.PopulateFeature(feature);
 
             var builder = new ContainerBuilder();
-            builder.RegisterTypes(feature.Controllers.Select(ti => ti.AsType()).ToArray()).PropertiesAutowired();
 
             //Register DataLayer
+            //NOTE: This Project has direct references to the DAL.MSSQL and DAL.Oracle, which is incorrect, but okay for Proof of Concept here.
+            //There should NOT be a strong dependency, but .NET core project doesn't automatically pull the dependent DLLs from Business.Services.
+            //In real project, the DAL.MSSQL.dll and DAL.Oracle.dll will be dropped into the /bin folder through a build script.
             var dalSettings = Configuration.GetSection("DalSettings");
             var assemblyName = dalSettings["Assembly"];
             var connectionString = dalSettings["ConnectionString"];
@@ -116,14 +111,9 @@ namespace RestApi
 
             builder.Populate(services);
             var container = builder.Build();
-            this.ApplicationContainer = container;
+            ApplicationContainer = container;
 
-            //Register injectable container, to allow use in Factory model
-            var builder2 = new ContainerBuilder();
-            builder2.RegisterInstance<IContainer>(container);
-            builder2.Update(container);
-
-            return new AutofacServiceProvider(this.ApplicationContainer);
+            return new AutofacServiceProvider(ApplicationContainer);
         }
 
     }

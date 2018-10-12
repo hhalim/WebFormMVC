@@ -9,12 +9,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.5.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.3.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Business.Services\Business.Services.csproj" />
+    <ProjectReference Include="..\DAL.MSSQL\DAL.MSSQL.csproj" />
+    <ProjectReference Include="..\DAL.Oracle\DAL.Oracle.csproj" />
     <ProjectReference Include="..\Domain.Models\Domain.Models.csproj" />
   </ItemGroup>
 

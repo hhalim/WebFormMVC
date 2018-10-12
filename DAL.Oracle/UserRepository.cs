@@ -10,14 +10,17 @@ namespace DAL.Oracle
 {
     public class UserRepository : IUserRepository
     {
-        private List<User> fakeUsers;
-        public UserRepository()
-        {
-            fakeUsers.Add(new User { UserID = 1, FirstName = "user1", LastName = "oracle_lastname"});
-            fakeUsers.Add(new User { UserID = 2, FirstName = "user2", LastName = "oracle_lastname"});
-            fakeUsers.Add(new User { UserID = 3, FirstName = "user3", LastName = "oracle_lastname"});
-            fakeUsers.Add(new User { UserID = 4, FirstName = "user4", LastName = "oracle_lastname"});
+        private List<User> fakeUsers = new List<User>();
+        private readonly IDbContext _dbContext;
 
+        public UserRepository(IDbContext dbContext)
+        {
+            _dbContext = dbContext;
+
+            fakeUsers.Add(new User { UserID = 1, FirstName = "user1", LastName = "oracle"});
+            fakeUsers.Add(new User { UserID = 2, FirstName = "user2", LastName = "oracle"});
+            fakeUsers.Add(new User { UserID = 3, FirstName = "user3", LastName = "oracle"});
+            fakeUsers.Add(new User { UserID = 4, FirstName = "user4", LastName = "oracle"});
         }
 
         public IEnumerable<User> Get()
