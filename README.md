@@ -9,4 +9,4 @@ The WebFormMVC project isolates the root folder structure access only to files a
 In the Global.asax code, the Razor engine is set to allow searching for Views *.cshtml files through /MVC/UI.Project1/Views/.
 
 ### REST API
-The RestApi [appsettings.json](https://github.com/hhalim/WebFormMVC/blob/master/RestApi/appsettings.json) requires the correct url for CORS operation set, which is already set by default to http://localhost, http://localhost:52595. The UI layer uses direct JavaScript calls into the web api, this cross domain call needs the correct url in the settings file. If this is incorrect, the CORS initial OPTION preflight call will fail.
+The RestApi [appsettings.json](/RestApi/appsettings.json) requires the correct url for CORS operation set, which is already set by default to http://localhost, http://localhost:52595. The UI layer uses direct JavaScript calls into the web api, this cross domain call needs the correct url in the settings file. If this is incorrect, the CORS initial OPTION preflight call will fail.
